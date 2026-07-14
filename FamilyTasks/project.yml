@@ -1,0 +1,46 @@
+name: FamilyTasks
+options:
+  bundleIdPrefix: com.familytasks
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+configs:
+  Debug: debug
+  Release: release
+packages:
+  FirebaseiOSSDK:
+    url: https://github.com/firebase/firebase-ios-sdk
+    exactVersion: 10.29.0
+targets:
+  FamilyTasks:
+    type: application
+    platform: iOS
+    sources:
+      - path: FamilyTasks
+    info:
+      path: FamilyTasks/Info.plist
+      properties:
+        CFBundleDisplayName: "ТуДу фром Dashenka"
+        NSCameraUsageDescription: "Приложению нужен доступ к камере, чтобы прикреплять фото к задачам и комментариям."
+        NSPhotoLibraryAddUsageDescription: "Приложению нужен доступ к галерее, чтобы сохранять фото."
+        UIBackgroundModes:
+          - remote-notification
+        UILaunchScreen: {}
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.familytasks.app
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: FamilyTasks/FamilyTasks.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    dependencies:
+      - package: FirebaseiOSSDK
+        product: FirebaseAuth
+      - package: FirebaseiOSSDK
+        product: FirebaseFirestore
+      - package: FirebaseiOSSDK
+        product: FirebaseStorage
+      - package: FirebaseiOSSDK
+        product: FirebaseMessaging

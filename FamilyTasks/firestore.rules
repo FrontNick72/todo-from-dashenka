@@ -1,0 +1,61 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSpaceMember(spaceId) {
+      return request.auth != null &&
+        request.auth.uid in get(/databases/$(database)/documents/spaces/$(spaceId)).data.memberUids;
+    }
+
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /spaces/{spaceId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null &&
+        request.resource.data.memberUids.hasOnly([request.auth.uid]) &&
+        request.resource.data.memberUids.size() == 1;
+
+      // Существующий участник может обновлять пространство; новый участник может
+      // присоединиться (добавить себя), только пока в паре свободно место.
+      allow update: if request.auth != null &&
+        (resource.data.memberUids.hasAny([request.auth.uid]) ||
+         (request.resource.data.memberUids.hasAny([request.auth.uid]) && resource.data.memberUids.size() < 2));
+
+      allow delete: if false;
+
+      match /tags/{tagId} {
+        allow read, write: if isSpaceMember(spaceId);
+      }
+
+      match /tasks/{taskId} {
+        allow read, write: if isSpaceMember(spaceId);
+
+        match /comments/{commentId} {
+          allow read, write: if isSpaceMember(spaceId);
+        }
+
+        match /attachments/{attachmentId} {
+          allow read, write: if isSpaceMember(spaceId);
+        }
+
+        // events — неизменяемая история изменений; перенос даты обязан иметь причину.
+        match /events/{eventId} {
+          allow read: if isSpaceMember(spaceId);
+          allow create: if isSpaceMember(spaceId) &&
+            (request.resource.data.type != 'date_changed' ||
+             (request.resource.data.reason is string && request.resource.data.reason.size() > 0));
+          allow update, delete: if false;
+        }
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
