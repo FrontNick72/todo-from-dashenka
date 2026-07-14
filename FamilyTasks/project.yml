@@ -1,6 +1,6 @@
 name: FamilyTasks
 options:
-  bundleIdPrefix: com.familytasks
+  bundleIdPrefix: com.todofromdashenka
   deploymentTarget:
     iOS: "16.0"
   createIntermediateGroups: true
@@ -28,7 +28,7 @@ targets:
         UILaunchScreen: {}
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.familytasks.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.todofromdashenka.app
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic

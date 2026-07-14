@@ -28,4 +28,4 @@ xcodebuild -project FamilyTasks.xcodeproj -scheme FamilyTasks \
 APP_PATH="$VOLUME/DerivedData/Build/Products/Debug-iphonesimulator/FamilyTasks.app"
 xcrun simctl boot "iPhone 15" 2>/dev/null || true
 xcrun simctl install "iPhone 15" "$APP_PATH"
-xcrun simctl launch "iPhone 15" com.familytasks.app
+xcrun simctl launch "iPhone 15" com.todofromdashenka.app
