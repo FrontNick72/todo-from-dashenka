@@ -41,4 +41,8 @@ extension TaskItem {
         case .declined: return "Не выполнено"
         }
     }
+
+    var statusFillColor: Color {
+        status == .completed ? .green : .gray
+    }
 }

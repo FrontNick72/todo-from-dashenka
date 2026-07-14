@@ -54,6 +54,14 @@ struct TaskListView: View {
         }
     }
 
+    private func toggleComplete(_ task: TaskItem) {
+        guard let taskId = task.id else { return }
+        let newStatus: TaskStatus = task.status == .completed ? .open : .completed
+        Task {
+            try? await taskRepository.setStatus(spaceId: spaceId, taskId: taskId, status: newStatus, byUid: currentUid)
+        }
+    }
+
     var body: some View {
         NavigationStack(path: $navigationPath) {
             VStack(spacing: 0) {
@@ -73,7 +81,13 @@ struct TaskListView: View {
                 } else {
                     List(sortedTasks) { task in
                         NavigationLink(value: task.id ?? "") {
-                            TaskRowView(task: task, tags: tagRepository.tags)
+                            TaskRowView(
+                                task: task,
+                                tags: tagRepository.tags,
+                                isAssignedToMe: task.assignedTo == currentUid
+                            ) {
+                                toggleComplete(task)
+                            }
                         }
                     }
                     .listStyle(.plain)

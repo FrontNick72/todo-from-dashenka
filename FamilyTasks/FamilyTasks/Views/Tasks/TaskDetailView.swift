@@ -18,8 +18,18 @@ struct TaskDetailView: View {
     @State private var showingDeleteConfirmation = false
     @State private var viewerURL: URL?
     @State private var errorMessage: String?
+    @State private var selectedStatus: TaskStatus
+    @State private var isSavingStatus = false
 
     private var taskId: String { task.id ?? "" }
+
+    init(spaceId: String, task: TaskItem, currentUid: String, onDeleted: @escaping () -> Void = {}) {
+        self.spaceId = spaceId
+        self.task = task
+        self.currentUid = currentUid
+        self.onDeleted = onDeleted
+        _selectedStatus = State(initialValue: task.status)
+    }
 
     private var taskTags: [Tag] {
         tagRepository.tags.filter { tag in
@@ -120,13 +130,35 @@ struct TaskDetailView: View {
     }
 
     private var actionButtons: some View {
-        HStack {
-            Button("Выполнено") { setStatus(.completed) }
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Button("Выполнено") { selectedStatus = .completed }
+                    .buttonStyle(.borderedProminent)
+                    .tint(selectedStatus == .completed ? .green : Color(.systemGray4))
+                    .foregroundStyle(selectedStatus == .completed ? .white : .primary)
+
+                Button("Не выполнено") { selectedStatus = .declined }
+                    .buttonStyle(.borderedProminent)
+                    .tint(selectedStatus == .declined ? .gray : Color(.systemGray4))
+                    .foregroundStyle(selectedStatus == .declined ? .white : .primary)
+
+                Button("Перенести дату") { showingReschedule = true }
+                    .buttonStyle(.bordered)
+            }
+
+            if selectedStatus != task.status {
+                Button {
+                    saveStatus()
+                } label: {
+                    if isSavingStatus {
+                        ProgressView()
+                    } else {
+                        Text("Сохранить")
+                    }
+                }
                 .buttonStyle(.borderedProminent)
-            Button("Не выполнено") { setStatus(.declined) }
-                .buttonStyle(.bordered)
-            Button("Перенести дату") { showingReschedule = true }
-                .buttonStyle(.bordered)
+                .disabled(isSavingStatus)
+            }
         }
     }
 
@@ -235,13 +267,15 @@ struct TaskDetailView: View {
         }
     }
 
-    private func setStatus(_ status: TaskStatus) {
+    private func saveStatus() {
+        isSavingStatus = true
         Task {
             do {
-                try await taskRepository.setStatus(spaceId: spaceId, taskId: taskId, status: status, byUid: currentUid)
+                try await taskRepository.setStatus(spaceId: spaceId, taskId: taskId, status: selectedStatus, byUid: currentUid)
             } catch {
                 errorMessage = error.localizedDescription
             }
+            isSavingStatus = false
         }
     }
 
