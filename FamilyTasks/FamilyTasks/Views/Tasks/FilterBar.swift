@@ -24,7 +24,7 @@ struct FilterBar: View {
                         Button(label(for: priority)) { priorityFilter = priority }
                     }
                 } label: {
-                    chip(priorityFilter.map(label(for:)) ?? "Приоритет")
+                    chip(priorityFilter.map(label(for:)) ?? "Важная важность")
                 }
 
                 if !tags.isEmpty {
